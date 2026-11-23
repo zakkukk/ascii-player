@@ -1,80 +1,90 @@
 # ASCII Player
 
-Trasforma un video in **arte ASCII a colori** e lo riproduce in una finestra, scritto in Python con OpenCV e NumPy.
+Transform videos into **colorful ASCII art** and play them in a window. Built with Python, OpenCV, and NumPy.
 
-## Funzioni
+## Features
 
-- Ogni frame viene convertito in caratteri colorati
-- Finestra ridimensionabile
-- Pausa con SPAZIO, uscita con Q / ESC / X della finestra
-- Il video riparte da capo quando finisce
-- Si può creare un `.exe` da condividere (senza mostrare il codice sorgente)
+- Each video frame is converted into colored ASCII characters.
+- Resizable playback window.
+- Pause and resume using SPACE.
+- Exit using Q, ESC, or the window's close button.
+- The video automatically restarts when it reaches the end.
+- Create a shareable `.exe` file without exposing the source code.
 
-## Requisiti
+## Requirements
 
-- Python 3.8 o superiore
-- Librerie in `requirements.txt`
+- Python 3.8 or higher.
+- Dependencies listed in `requirements.txt`.
 
-## Installazione
+## Installation
 
-```
+```bash
 git clone https://github.com/zakkukk/ascii-player.git
 cd ascii-player
 pip install -r requirements.txt
 ```
 
-## Uso
+## Usage
 
-Metti un video chiamato `video.mp4` nella cartella del progetto e avvia:
+Place a video named `video.mp4` inside the project folder and run:
 
-```
+```bash
 python ascii_player.py
 ```
 
-Oppure indica un video qualsiasi:
+Alternatively, specify any video file:
 
+```bash
+python ascii_player.py path/to/my_video.mp4
 ```
-python ascii_player.py percorso/del/mio_video.mp4
-```
 
-| Tasto | Azione |
-|-------|--------|
-| SPAZIO | pausa / riprendi |
-| Q o ESC | chiudi |
+| **Key** | **Action** |
+|---|---|
+| SPACE | Pause / Resume |
+| Q or ESC | Exit |
 
-## Impostazioni
+## Configuration
 
-In cima a `ascii_player.py` puoi modificare:
+At the top of `ascii_player.py`, you can customize the following variables:
 
-| Variabile | Significato |
-|-----------|-------------|
-| `CARATTERI` | caratteri usati, dal più scuro al più chiaro |
-| `LARGHEZZA` | caratteri per riga (più alto = più dettaglio, più lento) |
-| `LUMINOSITA` | rende i colori più o meno vivaci |
+| **Variable** | **Description** |
+|---|---|
+| `CARATTERI` | Characters used, from darkest to brightest. |
+| `LARGHEZZA` | Characters per row (higher values provide more detail but reduce performance). |
+| `LUMINOSITA` | Makes colors more or less vivid. |
 
-Consiglio: i risultati migliori si ottengono con video a sfondo scuro e soggetti colorati.
+**Tip:** The best results are achieved with videos featuring dark backgrounds and colorful subjects.
 
-## Creare l'exe (Windows)
+## Creating the Executable (Windows)
 
-1. Metti `video.mp4` nella cartella del progetto
-2. Installa PyInstaller:
-   ```
+1. Place `video.mp4` inside the project folder.
+2. Install PyInstaller:
+
+   ```bash
    pip install pyinstaller
    ```
-3. Crea l'exe:
-   ```
+
+3. Build the executable:
+
+   ```bash
    pyinstaller --onefile --noconsole --name ASCII-Player --add-data "video.mp4;." ascii_player.py
    ```
-4. Troverai il file in `dist/ASCII-Player.exe`
 
-Note:
-- L'exe contiene già il video: basta condividere quel file
-- L'antivirus potrebbe segnalarlo (succede spesso con PyInstaller): scegli "Esegui comunque"
-- Se non si apre, rifai la build senza `--noconsole` per vedere gli errori
+4. The executable will be available in:
 
-## Struttura del progetto
+   ```text
+   dist/ASCII-Player.exe
+   ```
 
-```
+### Notes
+
+- The executable already includes the video, so you only need to share the `.exe` file.
+- Your antivirus may flag the executable (this is relatively common with PyInstaller). You may need to verify the file before running it.
+- If the application does not open, rebuild it without `--noconsole` to display error messages.
+
+## Project Structure
+
+```text
 ascii-player/
 ├── ascii_player.py
 ├── requirements.txt
@@ -82,7 +92,6 @@ ascii-player/
 └── .gitignore
 ```
 
-## Nota sui video
+## Video Disclaimer
 
-Il video non è incluso nel repository. Usa video tuoi o con licenza libera: non pubblicare contenuti coperti da copyright.
-
+The video is not included in this repository. Use your own videos or properly licensed content. Do not publish copyrighted material without permission.
