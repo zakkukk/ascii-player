@@ -1,6 +1,6 @@
 """
-ASCII Player (massima qualità)
-Trasforma un video in arte ASCII a colori e lo mostra in una finestra.
+ASCII Player (massima qualità, stile aesthetic)
+Trasforma un video in arte ASCII a colori e lo mostra a schermo intero, senza barra.
 
 Uso:
     python ascii_player.py              (usa video.mp4 nella cartella)
@@ -27,8 +27,9 @@ CELLA_A = 18               # altezza di un carattere in pixel
 FONT_SCALA = 0.5           # grandezza del carattere dentro la cella
 NITIDEZZA = 0.6            # rende i contorni più definiti (0 = spento)
 LUMINOSITA = 1.2           # moltiplicatore dei colori (1.0 = originali)
-LARGHEZZA_FINESTRA = 600  # larghezza iniziale della finestra in pixel
-SOGLIA_NERO = 50  
+SOGLIA_NERO = 50           # sotto questa luminosità (0-255) il pixel diventa nero
+SCHERMO_INTERO = True      # True = parte a schermo intero, senza barra del titolo
+LARGHEZZA_FINESTRA = 1000  # larghezza della finestra quando non è a schermo intero
 NOME_FINESTRA = "ASCII Player"
 # -----------------------------------------------------
 
@@ -77,6 +78,7 @@ def frame_in_ascii(frame, glifi, tabella):
         piccolo = cv2.addWeighted(piccolo, 1.0 + NITIDEZZA, sfocato, -NITIDEZZA, 0)
 
     # 3) scelgo il carattere in base alla luminosità (il canale più forte del pixel)
+    #    sotto SOGLIA_NERO il pixel diventa nero: toglie il rumore dello sfondo
     v = piccolo.max(axis=2)
     luce = np.clip((v.astype(np.float32) - SOGLIA_NERO) * 255.0 / (255 - SOGLIA_NERO), 0, 255).astype(np.uint8)
     indici = tabella[luce]
@@ -120,8 +122,12 @@ def main():
     glifi, tabella = crea_glifi()
     cv2.namedWindow(NOME_FINESTRA, cv2.WINDOW_NORMAL | cv2.WINDOW_KEEPRATIO)
 
+    # schermo intero = niente barra del titolo, sfondo nero tutto intorno
+    schermo_intero = SCHERMO_INTERO
+    if schermo_intero:
+        cv2.setWindowProperty(NOME_FINESTRA, cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)
+
     in_pausa = False
-    schermo_intero = False
     immagine = None
     prima_volta = True
 
@@ -137,9 +143,10 @@ def main():
             immagine = frame_in_ascii(frame, glifi, tabella)
 
             if prima_volta:
-                # la finestra parte con una dimensione comoda
-                alt_finestra = int(LARGHEZZA_FINESTRA * immagine.shape[0] / immagine.shape[1])
-                cv2.resizeWindow(NOME_FINESTRA, LARGHEZZA_FINESTRA, alt_finestra)
+                # se non è a schermo intero, la finestra parte con una dimensione comoda
+                if not schermo_intero:
+                    alt_finestra = int(LARGHEZZA_FINESTRA * immagine.shape[0] / immagine.shape[1])
+                    cv2.resizeWindow(NOME_FINESTRA, LARGHEZZA_FINESTRA, alt_finestra)
                 prima_volta = False
 
         cv2.imshow(NOME_FINESTRA, immagine)
@@ -159,6 +166,8 @@ def main():
                 cv2.setWindowProperty(NOME_FINESTRA, cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)
             else:
                 cv2.setWindowProperty(NOME_FINESTRA, cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_NORMAL)
+                alt_finestra = int(LARGHEZZA_FINESTRA * immagine.shape[0] / immagine.shape[1])
+                cv2.resizeWindow(NOME_FINESTRA, LARGHEZZA_FINESTRA, alt_finestra)
 
         # chiusura con la X della finestra
         if cv2.getWindowProperty(NOME_FINESTRA, cv2.WND_PROP_VISIBLE) < 1:
