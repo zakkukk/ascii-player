@@ -1,5 +1,5 @@
 """
-ASCII Player (alta qualità)
+ASCII Player (massima qualità)
 Trasforma un video in arte ASCII a colori e lo mostra in una finestra.
 
 Uso:
@@ -21,11 +21,14 @@ import time
 # ---------- IMPOSTAZIONI (puoi modificarle) ----------
 # 70 caratteri: più sono, più i passaggi di luce sono morbidi
 CARATTERI = " .'`^\",:;Il!i><~+_-?][}{1)(|\\/tfjrxnuvczXYUJCLQ0OZmwqpdbkhao*#MW&8%B@$"
-LARGHEZZA = 160            # caratteri per riga (più alto = più dettaglio, più pesante)
-CELLA_L = 8                # larghezza di un carattere in pixel
-CELLA_A = 12               # altezza di un carattere in pixel
-FONT_SCALA = 0.4           # grandezza del carattere dentro la cella
+LARGHEZZA = 200            # caratteri per riga (più alto = più dettaglio, più pesante)
+CELLA_L = 10               # larghezza di un carattere in pixel (più grande = caratteri più nitidi)
+CELLA_A = 18               # altezza di un carattere in pixel
+FONT_SCALA = 0.5           # grandezza del carattere dentro la cella
+NITIDEZZA = 0.6            # rende i contorni più definiti (0 = spento)
 LUMINOSITA = 1.2           # moltiplicatore dei colori (1.0 = originali)
+LARGHEZZA_FINESTRA = 600  # larghezza iniziale della finestra in pixel
+SOGLIA_NERO = 50  
 NOME_FINESTRA = "ASCII Player"
 # -----------------------------------------------------
 
@@ -43,7 +46,7 @@ def crea_glifi():
     for c in CARATTERI:
         img = np.zeros((CELLA_A, CELLA_L), dtype=np.uint8)
         if c != " ":
-            cv2.putText(img, c, (0, CELLA_A - 3), cv2.FONT_HERSHEY_SIMPLEX,
+            cv2.putText(img, c, (0, CELLA_A - 4), cv2.FONT_HERSHEY_SIMPLEX,
                         FONT_SCALA, 255, 1, cv2.LINE_AA)
         immagini.append(img)
     immagini = np.array(immagini)
@@ -68,22 +71,28 @@ def frame_in_ascii(frame, glifi, tabella):
     altezza = int(frame.shape[0] / frame.shape[1] * LARGHEZZA * CELLA_L / CELLA_A)
     piccolo = cv2.resize(frame, (LARGHEZZA, altezza), interpolation=cv2.INTER_AREA)
 
-    # 2) scelgo il carattere in base alla luminosità (il canale più forte del pixel)
-    v = piccolo.max(axis=2)
-    indici = tabella[v]
+    # 2) rendo i contorni più nitidi (maschera di contrasto)
+    if NITIDEZZA > 0:
+        sfocato = cv2.GaussianBlur(piccolo, (0, 0), 1.0)
+        piccolo = cv2.addWeighted(piccolo, 1.0 + NITIDEZZA, sfocato, -NITIDEZZA, 0)
 
-    # 3) unisco le immagini dei caratteri scelti in un'unica maschera
+    # 3) scelgo il carattere in base alla luminosità (il canale più forte del pixel)
+    v = piccolo.max(axis=2)
+    luce = np.clip((v.astype(np.float32) - SOGLIA_NERO) * 255.0 / (255 - SOGLIA_NERO), 0, 255).astype(np.uint8)
+    indici = tabella[luce]
+
+    # 4) unisco le immagini dei caratteri scelti in un'unica maschera
     celle = glifi[indici]                       # forma: (righe, colonne, A, L)
     celle = celle.transpose(0, 2, 1, 3)         # (righe, A, colonne, L)
     maschera = celle.reshape(altezza * CELLA_A, LARGHEZZA * CELLA_L)
 
-    # 4) colori più vivaci: la luminosità la danno già i caratteri
+    # 5) colori più vivaci: la luminosità la danno già i caratteri
     v_float = np.maximum(v, 1).astype(np.float32)[:, :, None]
     colori = piccolo.astype(np.float32)
     colori = colori * 0.4 + colori * (255.0 / v_float) * 0.6
     colori = np.clip(colori * LUMINOSITA, 0, 255).astype(np.uint8)
 
-    # 5) ingrandisco i colori e li applico ai caratteri
+    # 6) ingrandisco i colori e li applico ai caratteri
     colori = cv2.resize(colori, (LARGHEZZA * CELLA_L, altezza * CELLA_A),
                         interpolation=cv2.INTER_NEAREST)
     maschera = cv2.merge([maschera, maschera, maschera])
@@ -129,7 +138,8 @@ def main():
 
             if prima_volta:
                 # la finestra parte con una dimensione comoda
-                cv2.resizeWindow(NOME_FINESTRA, 1280, int(1280 * immagine.shape[0] / immagine.shape[1]))
+                alt_finestra = int(LARGHEZZA_FINESTRA * immagine.shape[0] / immagine.shape[1])
+                cv2.resizeWindow(NOME_FINESTRA, LARGHEZZA_FINESTRA, alt_finestra)
                 prima_volta = False
 
         cv2.imshow(NOME_FINESTRA, immagine)
