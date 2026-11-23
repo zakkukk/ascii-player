@@ -86,6 +86,3 @@ ascii-player/
 
 Il video non è incluso nel repository. Usa video tuoi o con licenza libera: non pubblicare contenuti coperti da copyright.
 
-## Licenza
-
-Scegli una licenza (ad esempio MIT) quando crei il repository su GitHub.
