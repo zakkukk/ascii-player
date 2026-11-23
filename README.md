@@ -18,7 +18,7 @@ Trasforma un video in **arte ASCII a colori** e lo riproduce in una finestra, sc
 ## Installazione
 
 ```
-git clone https://github.com/TUO-NOME/ascii-player.git
+git clone https://github.com/zakkukk/ascii-player.git
 cd ascii-player
 pip install -r requirements.txt
 ```
